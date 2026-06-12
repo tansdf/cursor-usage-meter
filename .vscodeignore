@@ -1,0 +1,12 @@
+.vscode/**
+.cursor/**
+src/**
+scripts/**
+esbuild.mjs
+tsconfig.json
+**/*.ts
+**/*.map
+**/*.test.mjs
+.gitignore
+.gitattributes
+resources/icon.svg

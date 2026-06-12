@@ -1,0 +1,138 @@
+{
+  "name": "cursor-usage-meter",
+  "displayName": "Cursor Usage Meter",
+  "description": "Speedometer status bar indicator with Settings-style usage breakdown on hover.",
+  "version": "0.2.4",
+  "publisher": "local",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/cursor-usage-meter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/cursor-usage-meter/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/cursor-usage-meter#readme",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "icons": {
+      "speedometer": {
+        "description": "Speedometer gauge",
+        "default": {
+          "fontPath": "resources/speedometer.woff",
+          "fontCharacter": "\\E000"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "cursorUsageMeter.refresh",
+        "title": "Cursor Usage Meter: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cursorUsageMeter.openDashboard",
+        "title": "Cursor Usage Meter: Open Usage Dashboard"
+      },
+      {
+        "command": "cursorUsageMeter.setToken",
+        "title": "Cursor Usage Meter: Set Access Token (Secret Storage)"
+      },
+      {
+        "command": "cursorUsageMeter.diagnoseAuth",
+        "title": "Cursor Usage Meter: Diagnose Auth"
+      },
+      {
+        "command": "cursorUsageMeter.statusBarClick",
+        "title": "Cursor Usage Meter: Status Bar Action"
+      }
+    ],
+    "configuration": {
+      "title": "Cursor Usage Meter",
+      "properties": {
+        "cursorUsageMeter.pollIntervalSeconds": {
+          "type": "number",
+          "default": 300,
+          "minimum": 60,
+          "description": "Refresh interval in seconds (minimum 60)."
+        },
+        "cursorUsageMeter.warningPercent": {
+          "type": "number",
+          "default": 80,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Warning background threshold (percent used)."
+        },
+        "cursorUsageMeter.criticalPercent": {
+          "type": "number",
+          "default": 95,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Critical background threshold (percent used)."
+        },
+        "cursorUsageMeter.showDecimals": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show decimal places in percentages (e.g. 16.8% vs 17%)."
+        },
+        "cursorUsageMeter.barSegments": {
+          "type": "number",
+          "default": 34,
+          "minimum": 8,
+          "maximum": 48,
+          "description": "Segments per progress bar."
+        },
+        "cursorUsageMeter.barFillGlyph": {
+          "type": "string",
+          "default": "▓",
+          "description": "Progress bar character (fill and track use the same glyph; track is 50% opacity blue)."
+        },
+        "cursorUsageMeter.useSubscript": {
+          "type": "boolean",
+          "default": true,
+          "description": "Wrap bar lines in <sub> for smaller rendering (disable if stripped by renderer)."
+        },
+        "cursorUsageMeter.stateDbPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional override path to Cursor state.vscdb (useful on corporate machines with very large databases)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "test": "node src/test/progressBar.test.mjs && node src/test/usageClient.test.mjs && node src/test/auth.test.mjs",
+    "test:api": "node scripts/manual-test.mjs",
+    "package": "vsce package",
+    "generate:icons": "python scripts/generate-icon-font.py && npx @resvg/resvg-js-cli resources/icon.svg resources/icon.png --fit-width 128"
+  },
+  "dependencies": {
+    "sql.js": "^1.12.0"
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.3"
+  }
+}
