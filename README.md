@@ -1,155 +1,189 @@
 # Cursor Usage Meter
 
-A lightweight Cursor / VS Code extension that shows your plan usage in the status bar — with a Settings-style breakdown on hover.
+See your Cursor plan usage at a glance — right in the editor status bar. Hover for a breakdown similar to **Cursor Settings → Usage**, without leaving your workflow.
+
+Works with individual, team, and enterprise Cursor accounts on Windows, macOS, and Linux.
 
 ## Features
 
-- **Always visible** — pulse icon + Total % in the bottom-right status bar
-- **Hover breakdown** — miniature of Cursor Settings → Usage: Total, Auto + Composer, API, On-Demand, and billing dates
-- **Team & enterprise** — dollar-based team plans and request-based billing via Cursor's REST usage API
-- **Progress bars** — `▓` glyphs with full blue fill (`#3b82f6`) and muted blue track (`#2c508a`; VS Code tooltips strip `rgba`/`opacity`)
-- **Click to refresh** — status bar click fetches the latest usage
-- **Threshold highlights** — warning (≥80%) and critical (≥95%) background colors
-- **Auto-refresh** — polls every 5 minutes by default
+- **Status bar indicator** — pulse icon and total usage (percent, requests, or dollars depending on plan)
+- **Hover tooltip** — Total, Auto + Composer, API, On-Demand, and billing period dates
+- **One-click refresh** — click the status bar item to fetch the latest data
+- **Auto-refresh** — updates every 5 minutes by default (configurable)
+- **Usage alerts** — status bar background highlights at warning (80%) and critical (95%) thresholds
+- **Plan-aware** — supports percent-based plans, request-based billing, and team dollar limits
 
 ## Requirements
 
-- [Cursor](https://cursor.com) (or VS Code 1.85+)
-- Signed in to Cursor with an active subscription
+- [Cursor](https://cursor.com) or [VS Code](https://code.visualstudio.com/) 1.85+
+- An active Cursor subscription and a signed-in Cursor session on the machine where the extension runs
 
 ## Installation
 
-### From VSIX (local)
+### Option 1: GitHub Release (recommended)
+
+1. Open [Releases](https://github.com/tansdf/cursor-usage-meter/releases) and download the latest `cursor-usage-meter-X.Y.Z.vsix`.
+2. Install from a terminal:
+
+   **Cursor**
+
+   ```bash
+   cursor --install-extension cursor-usage-meter-X.Y.Z.vsix
+   ```
+
+   **VS Code**
+
+   ```bash
+   code --install-extension cursor-usage-meter-X.Y.Z.vsix
+   ```
+
+3. Reload the window: **Developer: Reload Window**.
+
+Releases are published automatically when a new version is tagged on the `master` branch.
+
+### Option 2: Build from source
 
 ```bash
-cursor --install-extension cursor-usage-meter-0.2.5.vsix
-```
-
-Then reload the window: **Developer: Reload Window**.
-
-### From source
-
-```bash
-git clone <your-repo-url>
+git clone https://github.com/tansdf/cursor-usage-meter.git
 cd cursor-usage-meter
 npm install
-npm run compile
+npm run package
+cursor --install-extension cursor-usage-meter-*.vsix
 ```
 
-Press **F5** to launch the Extension Development Host, or run `npm run package` to build a `.vsix`.
+For local development, press **F5** in VS Code/Cursor to launch an Extension Development Host.
 
 ## Usage
 
-| Interaction | Action |
+| Action | Result |
 |---|---|
-| **Status bar** | Shows `18%` (Total usage) |
-| **Hover** | Full usage breakdown with progress bars |
-| **Click** | Refresh usage data |
+| Glance at the status bar | Current total usage (e.g. `18%`, `42/500`, or `$12`) |
+| Hover the status bar item | Full usage breakdown with progress bars |
+| Click the status bar item | Refresh usage immediately |
 
 ### Commands
 
+Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
+
 | Command | Description |
 |---|---|
-| `Cursor Usage Meter: Refresh` | Fetch latest usage |
-| `Cursor Usage Meter: Open Usage Dashboard` | Open [cursor.com/dashboard/usage](https://cursor.com/dashboard/usage) |
-| `Cursor Usage Meter: Set Access Token` | Manual token fallback (Secret Storage) |
+| **Cursor Usage Meter: Refresh** | Fetch the latest usage data |
+| **Cursor Usage Meter: Open Usage Dashboard** | Open [cursor.com/dashboard/usage](https://cursor.com/dashboard/usage) |
+| **Cursor Usage Meter: Set Access Token** | Store an access token in VS Code Secret Storage |
+| **Cursor Usage Meter: Diagnose Auth** | Show where the extension looks for credentials and whether the API is reachable |
 
 ## Settings
 
 | Setting | Default | Description |
 |---|---|---|
-| `cursorUsageMeter.pollIntervalSeconds` | `300` | Refresh interval (min 60s) |
-| `cursorUsageMeter.warningPercent` | `80` | Warning background threshold |
-| `cursorUsageMeter.criticalPercent` | `95` | Critical background threshold |
-| `cursorUsageMeter.showDecimals` | `false` | Show `16.8%` instead of `17%` |
-| `cursorUsageMeter.barSegments` | `34` | Characters per progress bar |
-| `cursorUsageMeter.barFillGlyph` | `▓` | Bar character (fill + track) |
-| `cursorUsageMeter.useSubscript` | `true` | Render bars slightly smaller |
-| `cursorUsageMeter.stateDbPath` | `""` | Optional path to a trimmed `state.vscdb` |
+| `cursorUsageMeter.pollIntervalSeconds` | `300` | How often to refresh (seconds; minimum `60`) |
+| `cursorUsageMeter.warningPercent` | `80` | Status bar warning background threshold |
+| `cursorUsageMeter.criticalPercent` | `95` | Status bar critical background threshold |
+| `cursorUsageMeter.showDecimals` | `false` | Show `16.8%` instead of rounding to `17%` |
+| `cursorUsageMeter.barSegments` | `34` | Width of each progress bar in characters |
+| `cursorUsageMeter.barFillGlyph` | `▓` | Character used for progress bar fill and track |
+| `cursorUsageMeter.useSubscript` | `true` | Render bars slightly smaller in the tooltip |
+| `cursorUsageMeter.stateDbPath` | `""` | Custom path to Cursor's `state.vscdb` (see below) |
 
 ## How it works
 
-The extension reads your Cursor access token from the local `state.vscdb` database (same source Cursor itself uses), then calls the undocumented `GetCurrentPeriodUsage` and `GetPlanInfo` endpoints on `api2.cursor.sh`. Tokens are kept in memory only and are never logged or written to disk.
+The extension reads the Cursor access token from the local `state.vscdb` database — the same store Cursor uses when you are signed in. It then calls Cursor's usage endpoints on `api2.cursor.sh`.
 
-If auto-detection fails, use **Set Access Token** to store a token in VS Code Secret Storage.
+Tokens are held in memory during a session. They are not logged or written to disk by this extension.
 
-## Corporate / team machines
+If automatic detection fails, **Set Access Token** stores a token in VS Code Secret Storage (encrypted by the editor, cross-platform).
 
-Corporate accounts use the same Cursor login, but token storage can differ:
+## Restricted or non-standard setups
 
-1. **Sign in to Cursor** on the corporate PC (same account you use in the browser).
-2. Run **Cursor Usage Meter: Diagnose Auth** to see whether SQLite, CLI fallback, or secret storage has a token.
-3. If auth still fails, use **Set Access Token** once on that machine.
+Some environments need extra steps. These are uncommon but supported.
 
-### Getting a token for Set Access Token
+### Managed or locked-down machines
 
-On your personal PC (where usage already works), from this repo:
+If you are signed in to Cursor but the extension cannot find a token:
 
-```powershell
+1. Run **Cursor Usage Meter: Diagnose Auth** to see which sources were checked.
+2. Use **Set Access Token** to provide a token manually (one-time per machine).
+
+To obtain a token from a machine where Cursor is already working:
+
+```bash
+git clone https://github.com/tansdf/cursor-usage-meter.git
+cd cursor-usage-meter
+npm install
 node scripts/extract-token.mjs
 ```
 
-Copy the printed JWT, then on the corporate PC run **Set Access Token** and paste it.
+Copy the printed token, then run **Set Access Token** on the target machine.
 
-Or manually: open `%APPDATA%\Cursor\User\globalStorage\state.vscdb` in [DB Browser for SQLite](https://sqlitebrowser.org/), table `ItemTable`, key `cursorAuth/accessToken`.
+Alternatively, open Cursor's `state.vscdb` in [DB Browser for SQLite](https://sqlitebrowser.org/), table `ItemTable`, key `cursorAuth/accessToken`.
 
-### Large `state.vscdb` workaround
+Default database locations:
 
-Some corporate machines accumulate a multi-GB `state.vscdb`, which can prevent the extension from reading auth. Fix:
+| OS | Path |
+|---|---|
+| Windows | `%APPDATA%\Cursor\User\globalStorage\state.vscdb` |
+| macOS | `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb` |
+| Linux | `~/.config/Cursor/User/globalStorage/state.vscdb` |
 
-1. Copy `state.vscdb` to a safe location.
-2. In DB Browser, keep only the `ItemTable` table (delete `cursorDiskKV` if present).
-3. Set `cursorUsageMeter.stateDbPath` to that trimmed copy.
+### Very large `state.vscdb` files
 
-### Remote SSH / WSL
+On some machines the database grows to multiple gigabytes and cannot be opened in-process. Workaround:
 
-If Diagnose Auth shows `Extension host: remote (wsl)`, the extension is running inside WSL instead of on Windows.
+1. Copy `state.vscdb` to another location.
+2. In DB Browser, keep only the `ItemTable` table (remove `cursorDiskKV` if present).
+3. Set `cursorUsageMeter.stateDbPath` to the trimmed copy.
 
-Add this to your Cursor **User settings.json** to force it to run locally (recommended on Windows + WSL workspaces):
+For databases over 256 MB, the extension can also fall back to the `sqlite3` command-line tool if it is installed.
+
+### Remote SSH, WSL, or dev containers
+
+The extension must read Cursor's local auth database. If **Diagnose Auth** reports a remote extension host (e.g. WSL or SSH), force it to run on the local UI machine.
+
+Add to **User settings.json**:
 
 ```json
 "remote.extensionKind": {
-  "local.cursor-usage-meter": ["ui"]
+  "tansdf.cursor-usage-meter": ["ui"]
 }
 ```
 
-Reload Cursor after changing settings. If usage still fails with a token present, check the `API:` line in **Diagnose Auth** — enterprise accounts may need corporate network access to `api2.cursor.sh` and `cursor.com`.
+Reload the window after saving. Enterprise networks may also need access to `api2.cursor.sh` and `cursor.com`.
 
 ## Troubleshooting
 
-**Status bar item missing**
+**Status bar item does not appear**
 
-- Ensure the extension is enabled
-- Right-click the status bar → check **Cursor Usage Meter**
-- Run **Developer: Reload Window**
+- Confirm the extension is enabled in the Extensions view.
+- Right-click the status bar and ensure **Cursor Usage Meter** is checked.
+- Run **Developer: Reload Window**.
 
-**Shows `!` or auth error**
+**Status bar shows `!`**
 
-- Sign in to Cursor, or run **Set Access Token**
-- Click the status bar to retry
+- Sign in to Cursor on this machine, or use **Set Access Token**.
+- Click the status bar item to retry, or run **Diagnose Auth** for details.
 
-**Still seeing old bar characters**
+**Progress bars look wrong**
 
-- Remove `cursorUsageMeter.barTrackGlyph` from `settings.json` if present (no longer used)
-- Set `barFillGlyph` → `▓` or remove it to use the default
+- Remove deprecated `cursorUsageMeter.barTrackGlyph` from settings if present.
+- Set `cursorUsageMeter.barFillGlyph` to `▓`, or delete the setting to use the default.
 
-**Hidden by status bar overflow**
+**Item hidden behind other status bar entries**
 
-- The item sits at the far right; hide other status bar items if needed
+- The meter is pinned to the far right; hide or reorder other status bar items if needed.
 
 ## Development
 
 ```bash
-npm run compile    # build
-npm run watch      # watch mode
+npm run compile    # build once
+npm run watch      # rebuild on change
 npm run test       # unit tests
 npm run test:api   # live API smoke test (requires Cursor sign-in)
-npm run package    # create .vsix
+npm run package    # create a .vsix
 ```
 
 ## Disclaimer
 
-This extension uses Cursor's undocumented internal API. It may break without notice when Cursor updates. Not affiliated with or endorsed by Cursor.
+This extension uses Cursor's undocumented internal API. It may stop working when Cursor changes its backend. Not affiliated with or endorsed by Cursor.
 
 ## License
 
