@@ -3,17 +3,17 @@
   "displayName": "Cursor Usage Meter",
   "description": "Speedometer status bar indicator with Settings-style usage breakdown on hover.",
   "version": "0.2.4",
-  "publisher": "local",
+  "publisher": "tansdf",
   "license": "MIT",
   "icon": "resources/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/cursor-usage-meter.git"
+    "url": "https://github.com/tansdf/cursor-usage-meter.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/cursor-usage-meter/issues"
+    "url": "https://github.com/tansdf/cursor-usage-meter/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/cursor-usage-meter#readme",
+  "homepage": "https://github.com/tansdf/cursor-usage-meter#readme",
   "engines": {
     "vscode": "^1.85.0"
   },
