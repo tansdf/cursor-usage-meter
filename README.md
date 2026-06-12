@@ -71,6 +71,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
 | **Cursor Usage Meter: Open Usage Dashboard** | Open [cursor.com/dashboard/usage](https://cursor.com/dashboard/usage) |
 | **Cursor Usage Meter: Set Access Token** | Store an access token in VS Code Secret Storage |
 | **Cursor Usage Meter: Diagnose Auth** | Show where the extension looks for credentials and whether the API is reachable |
+| **Cursor Usage Meter: Pick Bar Fill Color** | Open a visual color picker for progress bar fill color |
 
 ## Settings
 
@@ -82,7 +83,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
 | `cursorUsageMeter.showDecimals` | `false` | Show `16.8%` instead of rounding to `17%` |
 | `cursorUsageMeter.barSegments` | `34` | Width of each progress bar in characters |
 | `cursorUsageMeter.barFillGlyph` | `▓` | Character used for progress bar fill and track |
-| `cursorUsageMeter.barFillColor` | `#3b82f6` | Bar fill color (color picker in Settings). Track color is derived automatically |
+| `cursorUsageMeter.barFillColor` | `#3b82f6` | Bar fill color (hex). Use **Pick Bar Fill Color** command for a visual picker; track color is derived automatically |
 | `cursorUsageMeter.useSubscript` | `true` | Render bars slightly smaller in the tooltip |
 | `cursorUsageMeter.stateDbPath` | `""` | Custom path to Cursor's `state.vscdb` (see below) |
 

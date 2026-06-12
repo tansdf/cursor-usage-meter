@@ -8,6 +8,7 @@ import {
   setSecretAccessToken,
 } from './auth/cursorAuth';
 import { readConfig } from './config';
+import { pickBarFillColor } from './ui/barColorPicker';
 import { UsageStatusBar } from './ui/statusBar';
 
 let pollTimer: ReturnType<typeof setInterval> | undefined;
@@ -160,6 +161,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       if (action?.command) {
         await vscode.commands.executeCommand(action.command);
       }
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cursorUsageMeter.pickBarFillColor', async () => {
+      await pickBarFillColor();
     }),
   );
 

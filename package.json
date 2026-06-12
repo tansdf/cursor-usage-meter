@@ -2,7 +2,7 @@
   "name": "cursor-usage-meter",
   "displayName": "Cursor Usage Meter",
   "description": "Pulse status bar indicator with Settings-style usage breakdown on hover.",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "publisher": "tansdf",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -45,6 +45,10 @@
       {
         "command": "cursorUsageMeter.diagnoseAuth",
         "title": "Cursor Usage Meter: Diagnose Auth"
+      },
+      {
+        "command": "cursorUsageMeter.pickBarFillColor",
+        "title": "Cursor Usage Meter: Pick Bar Fill Color"
       },
       {
         "command": "cursorUsageMeter.statusBarClick",
@@ -96,7 +100,7 @@
           "default": "#3b82f6",
           "format": "color-hex",
           "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
-          "description": "Progress bar fill color. Track color is derived automatically."
+          "markdownDescription": "Progress bar fill color. Track color is derived automatically. Use command **Cursor Usage Meter: Pick Bar Fill Color** for a visual picker (the Settings UI only supports text input). In `settings.json`, a color swatch appears next to this value."
         },
         "cursorUsageMeter.useSubscript": {
           "type": "boolean",
