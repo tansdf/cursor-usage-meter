@@ -10,3 +10,5 @@ tsconfig.json
 .gitignore
 .gitattributes
 resources/icon.svg
+resources/pulse.svg
+node_modules/**

@@ -112,7 +112,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         `Exists: ${diagnostic.stateDbExists ? 'yes' : 'no'}`,
         diagnostic.stateDbSizeMb !== null ? `Size: ${diagnostic.stateDbSizeMb} MB` : null,
         `SQLite token: ${diagnostic.sqliteAccessToken ? 'yes' : 'no'}`,
-        `Keychain/CLI token: ${diagnostic.keychainAccessToken ? 'yes' : 'no'}`,
         `Secret storage token: ${diagnostic.secretStorageToken ? 'yes' : 'no'}`,
         diagnostic.sqliteMembershipType ? `Membership: ${diagnostic.sqliteMembershipType}` : null,
         diagnostic.selectedSource ? `Selected source: ${diagnostic.selectedSource}` : null,

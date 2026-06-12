@@ -4,7 +4,7 @@ A lightweight Cursor / VS Code extension that shows your plan usage in the statu
 
 ## Features
 
-- **Always visible** — speedometer icon + Total % in the bottom-right status bar
+- **Always visible** — pulse icon + Total % in the bottom-right status bar
 - **Hover breakdown** — miniature of Cursor Settings → Usage: Total, Auto + Composer, API, On-Demand, and billing dates
 - **Team & enterprise** — dollar-based team plans and request-based billing via Cursor's REST usage API
 - **Progress bars** — `▓` glyphs with full blue fill (`#3b82f6`) and muted blue track (`#2c508a`; VS Code tooltips strip `rgba`/`opacity`)
@@ -22,7 +22,7 @@ A lightweight Cursor / VS Code extension that shows your plan usage in the statu
 ### From VSIX (local)
 
 ```bash
-cursor --install-extension cursor-usage-meter-0.2.4.vsix
+cursor --install-extension cursor-usage-meter-0.2.5.vsix
 ```
 
 Then reload the window: **Developer: Reload Window**.
@@ -78,7 +78,7 @@ If auto-detection fails, use **Set Access Token** to store a token in VS Code Se
 Corporate accounts use the same Cursor login, but token storage can differ:
 
 1. **Sign in to Cursor** on the corporate PC (same account you use in the browser).
-2. Run **Cursor Usage Meter: Diagnose Auth** to see whether SQLite, keychain/CLI, or secret storage has a token.
+2. Run **Cursor Usage Meter: Diagnose Auth** to see whether SQLite, CLI fallback, or secret storage has a token.
 3. If auth still fails, use **Set Access Token** once on that machine.
 
 ### Getting a token for Set Access Token

@@ -9,9 +9,6 @@ const ACCESS_KEY = 'cursorAuth/accessToken';
 const REFRESH_KEY = 'cursorAuth/refreshToken';
 const MEMBERSHIP_KEY = 'cursorAuth/stripeMembershipType';
 
-const KEYCHAIN_ACCESS_SERVICE = 'cursor-access-token';
-const KEYCHAIN_REFRESH_SERVICE = 'cursor-refresh-token';
-
 type InitSqlJs = (opts?: { wasmBinary?: Buffer | Uint8Array }) => Promise<{
   Database: new (data?: Uint8Array) => {
     prepare: (sql: string) => {
@@ -34,7 +31,7 @@ type SqlDatabase = {
   close: () => void;
 };
 
-export type AuthTokenSource = 'memory' | 'secret' | 'sqlite' | 'keychain';
+export type AuthTokenSource = 'memory' | 'secret' | 'sqlite';
 
 export interface AuthDiagnostic {
   stateDbPath: string;
@@ -46,8 +43,6 @@ export interface AuthDiagnostic {
   sqliteAccessToken: boolean;
   sqliteRefreshToken: boolean;
   sqliteMembershipType: string | null;
-  keychainAccessToken: boolean;
-  keychainRefreshToken: boolean;
   secretStorageToken: boolean;
   wasmAvailable: boolean;
   selectedSource: AuthTokenSource | null;
@@ -132,7 +127,7 @@ function configuredStateDbPath(): string {
 }
 
 function resolveSqlJsWasmPath(extensionPath: string): string {
-  return path.join(extensionPath, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
+  return path.join(extensionPath, 'dist', 'sql-wasm.wasm');
 }
 
 export function normalizeStoredToken(raw: unknown): string | null {
@@ -316,81 +311,6 @@ async function readSqliteAuth(extensionPath: string): Promise<{
   };
 }
 
-type KeytarModule = {
-  getPassword: (service: string, account: string) => Promise<string | null>;
-  findPassword: (service: string) => Promise<string | null>;
-};
-
-async function loadKeytar(): Promise<KeytarModule | null> {
-  try {
-    const keytarMod = await import('keytar');
-    const keytar = (keytarMod as { default?: KeytarModule }).default ?? (keytarMod as KeytarModule);
-    if (typeof keytar.getPassword !== 'function') {
-      return null;
-    }
-    return keytar;
-  } catch {
-    return null;
-  }
-}
-
-async function readKeychainPassword(service: string): Promise<string | null> {
-  const keytar = await loadKeytar();
-  if (!keytar) {
-    return null;
-  }
-
-  const attempts: Array<[string, string]> = [
-    [service, 'cursor'],
-    [service, 'Cursor'],
-    ['cursor', service],
-  ];
-  for (const [svc, account] of attempts) {
-    try {
-      const value = await keytar.getPassword(svc, account);
-      const normalized = normalizeStoredToken(value);
-      if (normalized) {
-        return normalized;
-      }
-    } catch {
-      // keytar throws when service/account are invalid for this host
-    }
-  }
-
-  if (typeof keytar.findPassword === 'function') {
-    for (const svc of [service, 'cursor']) {
-      try {
-        const value = await keytar.findPassword(svc);
-        const normalized = normalizeStoredToken(value);
-        if (normalized) {
-          return normalized;
-        }
-      } catch {
-        // ignore missing credentials for this service name
-      }
-    }
-  }
-
-  return null;
-}
-
-async function readKeychainAuth(): Promise<{
-  accessToken: string | null;
-  refreshToken: string | null;
-  error: string | null;
-}> {
-  try {
-    const [accessToken, refreshToken] = await Promise.all([
-      readKeychainPassword(KEYCHAIN_ACCESS_SERVICE),
-      readKeychainPassword(KEYCHAIN_REFRESH_SERVICE),
-    ]);
-    return { accessToken, refreshToken, error: null };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { accessToken: null, refreshToken: null, error: message };
-  }
-}
-
 export function decodeJwtPayload(token: string): Record<string, unknown> | null {
   const parts = token.split('.');
   if (parts.length < 2) {
@@ -403,14 +323,6 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
   } catch {
     return null;
   }
-}
-
-function tokenSubject(token: string | null): string | null {
-  if (!token) {
-    return null;
-  }
-  const payload = decodeJwtPayload(token);
-  return typeof payload?.sub === 'string' ? payload.sub : null;
 }
 
 function isTokenExpired(token: string, skewSeconds = 60): boolean {
@@ -463,26 +375,7 @@ export function buildWorkosSessionCookie(accessToken: string): { userId: string;
 
 function chooseAuthCandidate(
   sqlite: Awaited<ReturnType<typeof readSqliteAuth>>,
-  keychain: { accessToken: string | null; refreshToken: string | null },
 ): { accessToken: string | null; refreshToken: string | null; source: AuthTokenSource | null } {
-  const sqliteSubject = tokenSubject(sqlite.accessToken);
-  const keychainSubject = tokenSubject(keychain.accessToken);
-  const membership = sqlite.membershipType?.trim().toLowerCase() ?? null;
-  const sqliteLooksFree = membership === 'free';
-
-  if (keychain.accessToken) {
-    const preferKeychain =
-      !sqlite.accessToken ||
-      (sqliteLooksFree && !!keychainSubject && !!sqliteSubject && keychainSubject !== sqliteSubject);
-    if (preferKeychain) {
-      return {
-        accessToken: keychain.accessToken,
-        refreshToken: keychain.refreshToken ?? sqlite.refreshToken,
-        source: 'keychain',
-      };
-    }
-  }
-
   if (sqlite.accessToken) {
     return {
       accessToken: sqlite.accessToken,
@@ -491,24 +384,15 @@ function chooseAuthCandidate(
     };
   }
 
-  if (keychain.accessToken) {
-    return {
-      accessToken: keychain.accessToken,
-      refreshToken: keychain.refreshToken,
-      source: 'keychain',
-    };
-  }
-
   return { accessToken: null, refreshToken: null, source: null };
 }
 
 export function formatAuthFailureMessage(diagnostic: AuthDiagnostic): string {
-  const hasToken =
-    diagnostic.sqliteAccessToken || diagnostic.keychainAccessToken || diagnostic.secretStorageToken;
+  const hasToken = diagnostic.sqliteAccessToken || diagnostic.secretStorageToken;
   if (diagnostic.extensionHost === 'remote' && !hasToken) {
     return 'Extension is running remotely (WSL/SSH) and could not read Cursor auth. Run "Set Access Token", or force this extension to run locally (see README).';
   }
-  if (!diagnostic.stateDbExists && !diagnostic.keychainAccessToken && !diagnostic.secretStorageToken) {
+  if (!diagnostic.stateDbExists && !diagnostic.secretStorageToken) {
     return 'Cursor auth not found. Sign in to Cursor on this machine, or run "Set Access Token".';
   }
   if (diagnostic.stateDbExists && !diagnostic.sqliteAccessToken && diagnostic.stateDbSizeMb !== null && diagnostic.stateDbSizeMb > 256) {
@@ -524,22 +408,18 @@ export async function diagnoseAuth(
   context: vscode.ExtensionContext,
   extensionPath: string,
 ): Promise<AuthDiagnostic> {
-  const [sqlite, keychain, secretToken] = await Promise.all([
+  const [sqlite, secretToken] = await Promise.all([
     readSqliteAuth(extensionPath),
-    readKeychainAuth(),
     context.secrets.get(SECRET_STORAGE_KEY),
   ]);
   const notes: string[] = [];
   if (sqlite.error) {
     notes.push(`sqlite: ${sqlite.error}`);
   }
-  if (keychain.error) {
-    notes.push(`keychain: ${keychain.error}`);
-  }
   if (vscode.env.remoteName) {
     notes.push(`remote: ${vscode.env.remoteName}`);
   }
-  const selected = chooseAuthCandidate(sqlite, keychain);
+  const selected = chooseAuthCandidate(sqlite);
   if (secretToken) {
     selected.source = 'secret';
   } else if (cachedAccessToken && cachedTokenSource) {
@@ -556,8 +436,6 @@ export async function diagnoseAuth(
     sqliteAccessToken: !!sqlite.accessToken,
     sqliteRefreshToken: !!sqlite.refreshToken,
     sqliteMembershipType: sqlite.membershipType,
-    keychainAccessToken: !!keychain.accessToken,
-    keychainRefreshToken: !!keychain.refreshToken,
     secretStorageToken: !!secretToken,
     wasmAvailable: fs.existsSync(resolveSqlJsWasmPath(extensionPath)),
     selectedSource: selected.source,
@@ -580,8 +458,8 @@ export async function getAccessToken(
     return secretToken;
   }
 
-  const [sqlite, keychain] = await Promise.all([readSqliteAuth(extensionPath), readKeychainAuth()]);
-  const chosen = chooseAuthCandidate(sqlite, keychain);
+  const sqlite = await readSqliteAuth(extensionPath);
+  const chosen = chooseAuthCandidate(sqlite);
   cachedRefreshToken = chosen.refreshToken ?? cachedRefreshToken;
 
   let token = chosen.accessToken;

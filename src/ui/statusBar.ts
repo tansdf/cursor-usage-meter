@@ -3,7 +3,7 @@ import { UsageSnapshot } from '../api/usageClient';
 import { ExtensionConfig } from '../config';
 import { buildErrorTooltip, buildUsageTooltip } from './tooltipBuilder';
 
-const ICON_ID = 'speedometer';
+const ICON_ID = 'pulse';
 
 const TIME_FORMAT: Intl.DateTimeFormatOptions = {
   hour: '2-digit',

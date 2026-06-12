@@ -1,8 +1,8 @@
 {
   "name": "cursor-usage-meter",
   "displayName": "Cursor Usage Meter",
-  "description": "Speedometer status bar indicator with Settings-style usage breakdown on hover.",
-  "version": "0.2.4",
+  "description": "Pulse status bar indicator with Settings-style usage breakdown on hover.",
+  "version": "0.2.5",
   "publisher": "tansdf",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -28,15 +28,6 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "icons": {
-      "speedometer": {
-        "description": "Speedometer gauge",
-        "default": {
-          "fontPath": "resources/speedometer.woff",
-          "fontCharacter": "\\E000"
-        }
-      }
-    },
     "commands": [
       {
         "command": "cursorUsageMeter.refresh",
@@ -120,19 +111,14 @@
     "test": "node src/test/progressBar.test.mjs && node src/test/usageClient.test.mjs && node src/test/auth.test.mjs",
     "test:api": "node scripts/manual-test.mjs",
     "package": "vsce package",
-    "generate:icons": "python scripts/generate-icon-font.py && npx @resvg/resvg-js-cli resources/icon.svg resources/icon.png --fit-width 128"
-  },
-  "dependencies": {
-    "sql.js": "^1.12.0"
-  },
-  "optionalDependencies": {
-    "keytar": "^7.9.0"
+    "generate:icons": "npx @resvg/resvg-js-cli resources/icon.svg resources/icon.png --fit-width 128"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.0",
     "esbuild": "^0.25.0",
+    "sql.js": "^1.12.0",
     "typescript": "^5.6.3"
   }
 }
