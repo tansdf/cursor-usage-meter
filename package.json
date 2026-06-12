@@ -2,7 +2,7 @@
   "name": "cursor-usage-meter",
   "displayName": "Cursor Usage Meter",
   "description": "Pulse status bar indicator with Settings-style usage breakdown on hover.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "tansdf",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -89,7 +89,13 @@
         "cursorUsageMeter.barFillGlyph": {
           "type": "string",
           "default": "▓",
-          "description": "Progress bar character (fill and track use the same glyph; track is 50% opacity blue)."
+          "description": "Progress bar character (fill and track use the same glyph)."
+        },
+        "cursorUsageMeter.barFillColor": {
+          "type": "string",
+          "default": "#3b82f6",
+          "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+          "description": "Progress bar fill color (hex). Track color is derived automatically."
         },
         "cursorUsageMeter.useSubscript": {
           "type": "boolean",

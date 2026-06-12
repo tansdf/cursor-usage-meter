@@ -30,6 +30,7 @@ function barStyleFromConfig(config: ExtensionConfig) {
   return {
     segments: config.barSegments,
     fillGlyph: config.barFillGlyph,
+    fillColor: config.barFillColor,
     useSubscript: config.useSubscript,
   };
 }

@@ -82,6 +82,7 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
 | `cursorUsageMeter.showDecimals` | `false` | Show `16.8%` instead of rounding to `17%` |
 | `cursorUsageMeter.barSegments` | `34` | Width of each progress bar in characters |
 | `cursorUsageMeter.barFillGlyph` | `▓` | Character used for progress bar fill and track |
+| `cursorUsageMeter.barFillColor` | `#3b82f6` | Bar fill color (hex). Track color is derived automatically |
 | `cursorUsageMeter.useSubscript` | `true` | Render bars slightly smaller in the tooltip |
 | `cursorUsageMeter.stateDbPath` | `""` | Custom path to Cursor's `state.vscdb` (see below) |
 
